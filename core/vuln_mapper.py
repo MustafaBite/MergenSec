@@ -1,6 +1,6 @@
 # core/vuln_mapper.py
 
-# Basit servis eşleştirme
+# Port → servis eşleştirme
 def get_service(port):
     if port == 80:
         return "http"
@@ -32,25 +32,31 @@ CVE_DB = {
 }
 
 
+# CVSS → risk seviyesi
+def classify_risk(cvss):
+    if cvss >= 7:
+        return "HIGH"
+    elif cvss >= 4:
+        return "MEDIUM"
+    else:
+        return "LOW"
+
+
+# Ana mapping fonksiyonu
 def map_vulnerability(port):
     service = get_service(port)
 
     if service in CVE_DB:
         data = CVE_DB[service]
+        risk = classify_risk(data["cvss"])
 
         return {
             "port": port,
             "service": service,
             "cve": data["cve"],
             "description": data["description"],
-            "cvss": data["cvss"]
+            "cvss": data["cvss"],
+            "risk": risk
         }
 
     return None
-if __name__ == "__main__":
-    test_ports = [21, 22, 80]
-
-    for port in test_ports:
-        result = map_vulnerability(port)
-        if result:
-            print(result)
